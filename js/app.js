@@ -1,4 +1,42 @@
 "use strict";
-(()=>{const nodes='section,.panel,.stat,.tasks,.file,.window,.person,.hero,canvas'.split(',').flatMap(s=>[...document.querySelectorAll(s)]);const unique=[...new Set(nodes)].filter(n=>!n.closest('.side'));if(!('IntersectionObserver'in window)){unique.forEach(n=>n.classList.add('visible'));return}const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}}),{threshold:.08});unique.forEach(n=>{n.classList.add('reveal');io.observe(n)});})();
-
-const $=s=>document.querySelector(s);let img=new Image(),ready=false;$('#file').onchange=e=>{let f=e.target.files[0];if(!f)return;let u=URL.createObjectURL(f);img.onload=()=>{ready=true;$('#width').value=img.naturalWidth;$('#height').value=img.naturalHeight;$('#preview').innerHTML='';let p=img.cloneNode();p.src=u;$('#preview').append(p);$('#info').textContent=img.naturalWidth+' × '+img.naturalHeight+' · '+f.type;$('#export').disabled=false;};img.src=u};$('#width').onchange=()=>{if(ready&&img.naturalWidth)$('#height').value=Math.round(+$('#width').value*img.naturalHeight/img.naturalWidth)};$('#export').onclick=()=>{let w=Math.max(1,Math.min(6000,+$('#width').value)),h=Math.max(1,Math.min(6000,+$('#height').value)),c=$('#canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);c.toBlob(b=>{if(!b)return;let a=document.createElement('a'),u=URL.createObjectURL(b);a.href=u;a.download='sorovision.'+($('#format').value==='image/png'?'png':'jpg');a.click();URL.revokeObjectURL(u)},$('#format').value,.92)};
+const $ = selector => document.querySelector(selector);
+const canvas=$("#canvas"), context=canvas.getContext("2d");
+let image=null, imageUrl=null, originalName="image";
+function clamp(value,min,max){return Math.min(max,Math.max(min,Number(value)||min));}
+function drawPreview(){
+ if(!image)return;
+ const maxWidth=1000,maxHeight=650,scale=Math.min(maxWidth/image.naturalWidth,maxHeight/image.naturalHeight,1);
+ canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+ context.drawImage(image,0,0,canvas.width,canvas.height);
+ const preview=$("#preview");preview.replaceChildren();
+ const img=document.createElement("img");img.src=canvas.toDataURL("image/png");img.alt="Selected image preview";img.style.maxWidth="100%";img.style.maxHeight="520px";preview.append(img);
+ $("#info").textContent=image.naturalWidth+" × "+image.naturalHeight+" pixels";
+ $("#width").value=image.naturalWidth;$("#height").value=image.naturalHeight;$("#export").disabled=false;
+}
+$("#file").addEventListener("change",event=>{
+ const file=event.target.files?.[0];if(!file)return;
+ if(!file.type.startsWith("image/")){ $("#info").textContent="Please choose a valid image.";return; }
+ if(imageUrl)URL.revokeObjectURL(imageUrl);
+ imageUrl=URL.createObjectURL(file);originalName=file.name.replace(/\.[^.]+$/,"");
+ const next=new Image();
+ next.onload=()=>{image=next;drawPreview();};
+ next.onerror=()=>{$("#info").textContent="This image could not be opened.";};
+ next.src=imageUrl;
+});
+$("#width").addEventListener("change",()=>{if(image){const width=clamp($("#width").value,1,6000);$("#width").value=width;$("#height").value=Math.round(width*image.naturalHeight/image.naturalWidth);}});
+$("#height").addEventListener("change",()=>{if(image){const height=clamp($("#height").value,1,6000);$("#height").value=height;$("#width").value=Math.round(height*image.naturalWidth/image.naturalHeight);}});
+$("#export").addEventListener("click",()=>{
+ if(!image)return;
+ const width=clamp($("#width").value,1,6000),height=clamp($("#height").value,1,6000),format=$("#format").value;
+ const output=document.createElement("canvas");output.width=width;output.height=height;
+ const ctx=output.getContext("2d");
+ if(format==="image/jpeg"){ctx.fillStyle="#fff";ctx.fillRect(0,0,width,height);}
+ ctx.drawImage(image,0,0,width,height);
+ output.toBlob(blob=>{
+  if(!blob){$("#info").textContent="Export failed. Try another format.";return;}
+  const url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download=(originalName||"sorovision")+"-export."+(format==="image/png"?"png":"jpg");
+  link.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+ },format,.92);
+});
+window.addEventListener("beforeunload",()=>{if(imageUrl)URL.revokeObjectURL(imageUrl);});
