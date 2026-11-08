@@ -1,43 +1,22 @@
 # SoroVision
 
-> Image tools that run in your browser.
-
-Load an image and resize it or export it in common browser-supported formats. Processing uses the Canvas API locally; the image is not sent to a server.
+Privacy-conscious image utilities that run in your browser.
 
 ## Features
-
 - Local image preview
-- Resize with aspect ratio preserved
+- Resize with dimensions
 - Export as PNG or JPEG
-- No remote upload
+- Canvas-based processing
 
-## Tech stack
-
-HTML, CSS, vanilla JavaScript and Canvas API
-
-## Run locally
-
+## Run
 Open `index.html` and choose an image.
 
-## Scope and limitations
+## Scope
+Images are processed locally and are not uploaded. Browser format support varies; animated image frames are not preserved.
 
-Browser canvas decoding and encoding support varies by format. Animated images are not preserved.
-
-## Project structure
-
-```
-SoroVision/
-├── index.html   # self-contained interface and application logic
-└── README.md    # overview, setup and scope
-```
-
-## Development principles
-
-- Keep the interface accessible, responsive and dependency-light.
-- Prefer clear, readable code over unnecessary abstractions.
-- Never commit credentials, private data or generated user files.
-- Document limitations honestly and add tests as the project grows.
+## Structure
+- `index.html` — interface and image processing logic
+- `README.md` — project documentation
 
 ## License
-
-No license has been selected yet. Until a license is added, all rights are reserved by the copyright holder.
+No license selected. All rights reserved until a license is added.
