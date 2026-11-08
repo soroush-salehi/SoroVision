@@ -1,22 +1,22 @@
 # SoroVision
 
-Privacy-conscious image utilities that run in your browser.
+A browser-based image utility prototype. Image processing happens locally in the current page.
 
-## Features
-- Local image preview
-- Resize with dimensions
-- Export as PNG or JPEG
-- Canvas-based processing
+## Current features
+- Load an image from the device.
+- Preview the selected image.
+- Resize by width or height while preserving the aspect ratio.
+- Adjust brightness and grayscale.
+- Export as PNG or JPEG.
+
+## Stack
+HTML, CSS, Vanilla JavaScript, Canvas API.
 
 ## Run
-Open `index.html` and choose an image.
+Open `index.html` through a local static web server.
 
-## Scope
-Images are processed locally and are not uploaded. Browser format support varies; animated image frames are not preserved.
+## Important limitations
+There is no cloud processing or AI background removal. Very large images may use substantial browser memory.
 
-## Structure
-- `index.html` — interface and image processing logic
-- `README.md` — project documentation
-
-## License
-No license selected. All rights reserved until a license is added.
+## Roadmap
+Crop and rotate, undo/redo, more export formats, presets, and accessibility improvements.
